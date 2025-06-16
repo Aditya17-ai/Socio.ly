@@ -131,9 +131,9 @@ function App() {
       wsRef.current?.send(JSON.stringify({ type: 'subscribe', user: user.name, role: user.role, following }));
     };
     wsRef.current.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
+      const msg = JSON.parse(event.data) as { type: string; post: Post };
       if (msg.type === 'new_post') {
-        setAllPosts(prev => {
+        setAllPosts((prev: Post[]) => {
           if (prev.some(post => post.id === msg.post.id)) return prev;
           return [msg.post, ...prev];
         });
@@ -240,7 +240,7 @@ function App() {
   const newPostsCount = allPosts.filter(post => post.createdAt > lastSeen && (user?.role !== 'public' || following.includes(post.author))).length;
 
   // List all unique celebrities from posts
-  const allCelebrities = Array.from(new Set(allPosts.filter(p => p.role === 'celebrity').map(p => p.author)));
+  const allCelebrities: string[] = Array.from(new Set(allPosts.filter(p => p.role === 'celebrity').map(p => p.author)));
 
   // Browse celebrities tab for public users
   const [showCelebTab, setShowCelebTab] = useState(false);
@@ -249,12 +249,12 @@ function App() {
       <h3>Browse Celebrities</h3>
       {allCelebrities.length === 0 ? <div>No celebrities yet.</div> : (
         <ul className="celeb-list">
-          {allCelebrities.map(name => (
+          {allCelebrities.map((name: string, index: number) => (
             <li key={name}>
               <span>{name}</span>
               {following.includes(name)
-                ? <button className="unfollow-btn" onClick={() => handleUnfollow(name)}>Unfollow</button>
-                : <button className="follow-btn" onClick={() => handleFollow(name)}>Follow</button>
+          ? <button className="unfollow-btn" onClick={() => handleUnfollow(name)}>Unfollow</button>
+          : <button className="follow-btn" onClick={() => handleFollow(name)}>Follow</button>
               }
             </li>
           ))}
